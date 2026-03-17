@@ -1,75 +1,31 @@
-# Nuxt Minimal Starter
+# TODO: Single Nuxt 4 repo — app/ (frontend + content/docs), server/ (v1 API routes, dashboard API, middleware, db/redis utils). See isworkday-prd.md §6.
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+# isworkday
+
+Single Nuxt 4 repository for isworkday.io (API + landing + docs + dashboard).
+
+## Structure
+
+- **app/** — Frontend: `pages/` (landing, dashboard), `content/docs/` (Markdown via @nuxt/content), `components/`
+- **server/** — API: `routes/v1/` (check, range, next), `middleware/` (auth, rateLimit), `utils/` (db, redis), `api/dashboard/` (keys CRUD)
 
 ## Setup
 
-Make sure to install dependencies:
-
 ```bash
-# npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
+Copy `.env.example` to `.env` and set `DATABASE_URL`, `REDIS_URL`, etc.
 
-Start the development server on `http://localhost:3000`:
+## Development
 
 ```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
-
-Build the application for production:
+## Build
 
 ```bash
-# npm
 npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
 npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
 ```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.

@@ -1,0 +1,1 @@
+# TODO: Add landing/ and docs/ components. landing/ — reusable pieces for the landing page (hero, demo widget, pricing). docs/ — UI components for the docs site (e.g. code blocks, param tables). See PRD §6.
