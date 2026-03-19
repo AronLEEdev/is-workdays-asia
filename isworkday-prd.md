@@ -1,7 +1,7 @@
 # isworkday.io — Product Requirements Document
 
-**Version:** 0.2  
-**Date:** 2026-03-17  
+**Version:** 0.4  
+**Date:** 2026-03-18  
 **Status:** Draft
 
 ---
@@ -61,23 +61,57 @@ Data is sourced directly from official government publications and refreshed ann
 **Data model for each date entry:**
 
 ```json
+// makeup day
 {
-  "date": "2026-02-27",
-  "country": "TW",
-  "is_working_day": false,
+  "date": "2026-02-28",
+  "country": "CN",
+  "is_working": true,
+  "day_type": "makeup",
+  "name_en": "Makeup workday for Chinese New Year Holiday",
+  "name_local": "春节调休上班"
+}
+
+// holiday
+{
+  "date": "2026-02-17",
+  "country": "CN",
+  "is_working": false,
   "day_type": "holiday",
-  "name": "Peace Memorial Day",
-  "name_local": "和平紀念日",
-  "makeup_workday_for": null
+  "name_en": "Chinese New Year's Day",
+  "name_local": "春节"
+}
+
+// weekend within a holiday period
+{
+  "date": "2026-02-21",
+  "country": "CN",
+  "is_working": false,
+  "day_type": "weekend",
+  "name_en": "Chinese New Year Holiday Weekend",
+  "name_local": "春节假期周末"
+}
+
+// ordinary weekend
+{
+  "date": "2026-03-07",
+  "country": "CN",
+  "is_working": false,
+  "day_type": "weekend",
+  "name_en": null,
+  "name_local": null
 }
 ```
 
 **Day types:**
 
-- `working` — normal working day
-- `holiday` — official public holiday
-- `makeup` — make-up workday (working Saturday to compensate for a holiday)
-- `weekend` — regular Saturday/Sunday (non-working)
+- `working` — normal working day; `name_en` / `name_local` are null. Not stored in DB — API infers this for any date with no matching entry
+- `holiday` — official public holiday; always has `name_en` and `name_local`
+- `makeup` — make-up workday; `name_local` carries full context e.g. `春节调休上班`
+- `weekend` — Saturday or Sunday; `name_en` / `name_local` are **optional** — populated when the weekend falls within a public holiday period to provide context, null for ordinary weekends
+
+> **Design note — no `makeup_for` field:** The `name_en` and `name_local` fields already carry complete context about which holiday a makeup day compensates for. Storing a separate date reference would introduce ambiguity since makeup days correspond to a holiday period, not a single date.
+
+> **Design note — sparse storage:** Only special days (holiday, makeup, named weekends) are stored. The API treats any date with no matching entry as a working day if it falls on Mon–Fri, or a plain weekend if it falls on Sat–Sun. This keeps the database lean and avoids storing 365 rows of mostly-null working day entries per country per year.
 
 ---
 
@@ -115,7 +149,7 @@ GET /check
 **Example Request:**
 
 ```bash
-curl "https://api.isworkday.io/v1/check?country=TW&date=2026-02-27" \
+curl "https://api.isworkday.io/v1/check?country=CN&date=2026-02-28" \
   -H "X-API-Key: your_api_key_here"
 ```
 
@@ -123,13 +157,12 @@ curl "https://api.isworkday.io/v1/check?country=TW&date=2026-02-27" \
 
 ```json
 {
-  "date": "2026-02-27",
-  "country": "TW",
-  "is_working_day": false,
-  "day_type": "holiday",
-  "name": "Peace Memorial Day",
-  "name_local": "和平紀念日",
-  "makeup_workday_for": null
+  "date": "2026-02-28",
+  "country": "CN",
+  "is_working": true,
+  "day_type": "makeup",
+  "name_en": "Makeup workday for Chinese New Year Holiday",
+  "name_local": "春节调休上班"
 }
 ```
 
@@ -152,7 +185,7 @@ GET /range
 **Example Request:**
 
 ```bash
-curl "https://api.isworkday.io/v1/range?country=TW&from=2026-02-01&to=2026-02-28" \
+curl "https://api.isworkday.io/v1/range?country=CN&from=2026-02-01&to=2026-02-28" \
   -H "X-API-Key: your_api_key_here"
 ```
 
@@ -160,7 +193,7 @@ curl "https://api.isworkday.io/v1/range?country=TW&from=2026-02-01&to=2026-02-28
 
 ```json
 {
-  "country": "TW",
+  "country": "CN",
   "from": "2026-02-01",
   "to": "2026-02-28",
   "total_days": 28,
@@ -168,14 +201,25 @@ curl "https://api.isworkday.io/v1/range?country=TW&from=2026-02-01&to=2026-02-28
   "non_working_days": 10,
   "days": [
     {
-      "date": "2026-02-01",
-      "is_working_day": false,
-      "day_type": "weekend"
+      "date": "2026-02-14",
+      "is_working": true,
+      "day_type": "makeup",
+      "name_en": "Makeup workday for Chinese New Year Holiday",
+      "name_local": "春节调休上班"
     },
     {
-      "date": "2026-02-02",
-      "is_working_day": true,
-      "day_type": "working"
+      "date": "2026-02-17",
+      "is_working": false,
+      "day_type": "holiday",
+      "name_en": "Chinese New Year's Day",
+      "name_local": "春节"
+    },
+    {
+      "date": "2026-02-21",
+      "is_working": false,
+      "day_type": "weekend",
+      "name_en": null,
+      "name_local": null
     }
     // ... rest of days
   ]
@@ -201,7 +245,7 @@ GET /next
 **Example Request:**
 
 ```bash
-curl "https://api.isworkday.io/v1/next?country=TW&date=2026-02-27&skip=1" \
+curl "https://api.isworkday.io/v1/next?country=CN&date=2026-02-16&skip=1" \
   -H "X-API-Key: your_api_key_here"
 ```
 
@@ -209,10 +253,10 @@ curl "https://api.isworkday.io/v1/next?country=TW&date=2026-02-27&skip=1" \
 
 ```json
 {
-  "from": "2026-02-27",
-  "next_working_day": "2026-03-02",
+  "from": "2026-02-16",
+  "next_working_day": "2026-02-24",
   "working_days_skipped": 1,
-  "country": "TW"
+  "country": "CN"
 }
 ```
 
@@ -293,30 +337,86 @@ isworkday/
 
 ## 7. Database Schema
 
+Two-table design separating **year-level metadata** from **day-level entries**. This allows the n8n data pipeline to write draft data safely without affecting live API responses until a human manually publishes it.
+
+### 7.1 Calendar Tables
+
 ```sql
--- Calendar entries
+-- Year-level metadata: one row per country per year
+-- Controls publish status so draft data never leaks to the API
+CREATE TABLE calendar_years (
+  id          SERIAL PRIMARY KEY,
+  country     CHAR(2) NOT NULL,
+  year        INT NOT NULL,
+  status      VARCHAR(20) NOT NULL DEFAULT 'draft'
+              CHECK (status IN ('draft', 'verified', 'published')),
+  source_url  TEXT,
+  note        TEXT,
+  verified_at TIMESTAMP,
+  created_at  TIMESTAMP DEFAULT NOW(),
+  UNIQUE(country, year)
+);
+
+-- Day-level entries: one row per country per date
+-- year_id links back to calendar_years for status filtering
+-- name_en / name_local carry full context for all day types including makeup days
+-- e.g. name_local "春节调休上班" already implies which holiday is being compensated
+-- makeup_for field is intentionally omitted — name fields are sufficient
 CREATE TABLE calendar_entries (
   id          SERIAL PRIMARY KEY,
+  year_id     INT NOT NULL REFERENCES calendar_years(id),
   country     CHAR(2) NOT NULL,
   date        DATE NOT NULL,
   is_working  BOOLEAN NOT NULL,
-  day_type    VARCHAR(10) NOT NULL CHECK (day_type IN ('working', 'holiday', 'makeup', 'weekend')),
+  day_type    VARCHAR(10) NOT NULL
+              CHECK (day_type IN ('working', 'holiday', 'makeup', 'weekend')),
   name_en     VARCHAR(255),
   name_local  VARCHAR(255),
-  makeup_for  DATE,
   created_at  TIMESTAMP DEFAULT NOW(),
   UNIQUE(country, date)
 );
 
--- API keys
+-- Performance indexes
+CREATE INDEX idx_entries_country_date
+  ON calendar_entries(country, date);
+
+CREATE INDEX idx_years_country_status
+  ON calendar_years(country, status);
+```
+
+### 7.2 Status Lifecycle
+
+```
+draft → verified → published
+```
+
+- **draft** — written by n8n after AI parsing, not visible to API
+- **verified** — human has reviewed the data, ready to publish
+- **published** — live, returned by all API endpoints
+
+All API queries filter by `y.status = 'published'` via a JOIN:
+
+```sql
+SELECT e.*
+FROM calendar_entries e
+JOIN calendar_years y ON y.id = e.year_id
+WHERE e.country = 'CN'
+  AND e.date = '2026-02-14'
+  AND y.status = 'published'
+```
+
+### 7.3 API Keys Table
+
+```sql
 CREATE TABLE api_keys (
-  id          SERIAL PRIMARY KEY,
-  key_hash    VARCHAR(64) UNIQUE NOT NULL,
-  user_email  VARCHAR(255) NOT NULL,
-  tier        VARCHAR(20) NOT NULL DEFAULT 'free',
-  requests_this_month INTEGER DEFAULT 0,
-  created_at  TIMESTAMP DEFAULT NOW(),
-  last_used   TIMESTAMP
+  id                    SERIAL PRIMARY KEY,
+  key_hash              VARCHAR(64) UNIQUE NOT NULL,
+  user_email            VARCHAR(255) NOT NULL,
+  tier                  VARCHAR(20) NOT NULL DEFAULT 'free'
+                        CHECK (tier IN ('free', 'pro', 'business')),
+  requests_this_month   INTEGER DEFAULT 0,
+  created_at            TIMESTAMP DEFAULT NOW(),
+  last_used             TIMESTAMP
 );
 ```
 
