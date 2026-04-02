@@ -424,11 +424,12 @@ CREATE TABLE api_keys (
 
 ## 8. Pricing Tiers
 
-| Tier         | Price     | Requests/month | Countries     | SLA          |
-| ------------ | --------- | -------------- | ------------- | ------------ |
-| **Free**     | $0        | 500            | TW + CN       | None         |
-| **Pro**      | $9/month  | 50,000         | All countries | None         |
-| **Business** | $49/month | Unlimited      | All countries | 99.9% uptime |
+The pro tier's price $3 is not a fixed value, but a value received from Ko-Fi.com, when received support, the requests will be unlimited.
+
+| Tier     | Price | Requests/month | Countries     | SLA  |
+| -------- | ----- | -------------- | ------------- | ---- |
+| **Free** | $0    | 500            | TW + CN       | None |
+| **Pro**  | $3    | Unlimited      | All countries | None |
 
 ---
 

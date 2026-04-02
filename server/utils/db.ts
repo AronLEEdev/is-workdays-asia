@@ -1,2 +1,16 @@
-// TODO: PostgreSQL connection pool and query helpers for calendar_entries (by country/date or range)
-// and api_keys (lookup by key_hash, update last_used and requests_this_month).
+import postgres from "postgres";
+
+let sql: ReturnType<typeof postgres>;
+
+export function useDb() {
+  if (!sql) {
+    const config = useRuntimeConfig();
+    sql = postgres(config.databaseUrl, {
+      ssl: "require",
+      max: 10,
+      idle_timeout: 20,
+      connect_timeout: 10,
+    });
+  }
+  return sql;
+}
