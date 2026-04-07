@@ -1,4 +1,3 @@
-// TODO: Nuxt 4 config — enable @nuxt/content for app/content/docs, set compatibilityDate, runtimeConfig for API base URL and server-only (db, redis, stripe). See PRD §5–6.
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
@@ -6,8 +5,19 @@ export default defineNuxtConfig({
     port: 1234,
   },
   devtools: { enabled: true },
+  modules: ["nuxt-auth-utils", "@nuxtjs/i18n"],
+  css: ["~/assets/css/main.css"],
+  i18n: {
+    defaultLocale: "zh",
+    locales: [
+      { code: "zh", name: "中文", file: "zh.json" },
+      { code: "en", name: "English", file: "en.json" },
+    ],
+  },
   runtimeConfig: {
     databaseUrl: process.env.DATABASE_URL || "",
+    redisUrl: process.env.REDIS_URL || "",
+    demoApiKey: process.env.NUXT_DEMO_API_KEY || "",
     public: {},
   },
 });

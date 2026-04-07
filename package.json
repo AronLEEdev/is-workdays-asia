@@ -12,7 +12,11 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@nuxtjs/i18n": "^10.2.4",
+    "highlight.js": "^11.11.1",
+    "ioredis": "^5.10.0",
     "nuxt": "^4.4.2",
+    "nuxt-auth-utils": "^0.5.29",
     "postgres": "^3.4.8",
     "vue": "^3.5.30",
     "vue-router": "^5.0.3"

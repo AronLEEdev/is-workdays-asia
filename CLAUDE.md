@@ -52,13 +52,13 @@ Only special days (holiday, makeup, named weekends) are stored. The API infers a
 ### Rate limiting tiers
 
 - Free: 500 req/month
-- Pro: 50,000 req/month — unlocked via Buy Me a Coffee webhook (no fixed recurring price)
+- Pro: unlimited — unlocked via Ko-fi support (no fixed price)
 
-Pro is granted by a BMAC webhook: on payment received, set the matching key's tier to `pro` and reset `requests_this_month` to 0. No business/unlimited tier for now.
+Pro is granted by a Ko-fi webhook: on support received, set the matching key's tier to `pro`. Rate limiter skips the counter check entirely for pro keys.
 
 ### Data pipeline
 
-Not part of this repo. n8n runs locally once a year, fetches TW/CN government sources, parses with AI, and upserts to the Railway PostgreSQL instance via the `draft → verified → published` lifecycle.
+Not part of this repo. n8n runs locally once a year, fetches TW/CN government sources, parses with AI, and inserts to the Railway PostgreSQL instance via the `draft → verified → published` lifecycle.
 
 ## Environment
 

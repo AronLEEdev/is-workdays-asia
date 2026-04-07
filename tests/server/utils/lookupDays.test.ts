@@ -49,6 +49,18 @@ describe("resolveDay", () => {
       name_local: null,
     });
   });
+
+  it("returns a makeup entry as-is (is_working: true from DB)", () => {
+    const entry = {
+      date: "2026-02-28",
+      country: "CN",
+      is_working: true,
+      day_type: "makeup" as const,
+      name_en: "Makeup workday for Chinese New Year Holiday",
+      name_local: "春节调休上班",
+    };
+    expect(resolveDay("2026-02-28", "CN", entry)).toEqual(entry);
+  });
 });
 
 describe("lookupDaysInRange", () => {

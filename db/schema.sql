@@ -58,10 +58,39 @@ CREATE TABLE api_keys (
   key_hash            VARCHAR(64)  UNIQUE NOT NULL,
   user_email          VARCHAR(255) NOT NULL,
   tier                VARCHAR(20)  NOT NULL DEFAULT 'free'
-                      CHECK (tier IN ('free', 'pro', 'business')),
+                      CHECK (tier IN ('free', 'pro')),
   requests_this_month INTEGER      DEFAULT 0,
   created_at          TIMESTAMP    DEFAULT NOW(),
   last_used           TIMESTAMP
 );
 
 CREATE INDEX idx_api_keys_hash ON api_keys (key_hash);
+
+-- ---------------------------------------------------------------------------
+-- users
+-- One row per registered user. password_hash is null for OAuth-only users.
+-- ---------------------------------------------------------------------------
+CREATE TABLE users (
+  id            SERIAL PRIMARY KEY,
+  email         VARCHAR(255) UNIQUE NOT NULL,
+  name          VARCHAR(255),
+  password_hash VARCHAR(255),
+  created_at    TIMESTAMP DEFAULT NOW()
+);
+
+-- ---------------------------------------------------------------------------
+-- oauth_accounts
+-- Links a user to one or more OAuth provider accounts.
+-- Account linking: if OAuth email matches an existing user, a new row is
+-- added here without creating a duplicate users row.
+-- ---------------------------------------------------------------------------
+CREATE TABLE oauth_accounts (
+  id           SERIAL PRIMARY KEY,
+  user_id      INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  provider     VARCHAR(20) NOT NULL,
+  provider_id  VARCHAR(255) NOT NULL,
+  UNIQUE(provider, provider_id)
+);
+
+-- Add revoked_at support to api_keys for soft-delete revocation
+ALTER TABLE api_keys ADD COLUMN revoked_at TIMESTAMP;

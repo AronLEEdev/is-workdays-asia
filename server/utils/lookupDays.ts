@@ -9,9 +9,7 @@ export type DayEntry = {
   name_local: string | null;
 };
 
-type DbEntry = DayEntry;
-
-export function resolveDay(dateStr: string, country: string, entry?: DbEntry): DayEntry {
+export function resolveDay(dateStr: string, country: string, entry?: DayEntry): DayEntry {
   if (entry) return entry;
   const d = new Date(dateStr + "T00:00:00Z");
   const isWeekend = d.getUTCDay() === 0 || d.getUTCDay() === 6;
@@ -31,7 +29,7 @@ export async function lookupDaysInRange(
   from: string,
   to: string,
 ): Promise<DayEntry[]> {
-  const rows = await sql<DbEntry[]>`
+  const rows = await sql<DayEntry[]>`
     SELECT
       e.date::text AS date,
       e.country,
@@ -47,7 +45,7 @@ export async function lookupDaysInRange(
       AND y.status = 'published'
   `;
 
-  const entryMap = new Map<string, DbEntry>();
+  const entryMap = new Map<string, DayEntry>();
   for (const row of rows) {
     entryMap.set(row.date, row);
   }
